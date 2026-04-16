@@ -1,6 +1,6 @@
 """
 Script para criar executavel Windows do Analisador AMS
-Versao sem emojis para compatibilidade com Windows
+Versao COM CONSOLE para debug
 """
 
 import os
@@ -8,49 +8,34 @@ import sys
 import subprocess
 import shutil
 
-def verificar_estrutura():
-    """Verifica estrutura do projeto"""
-    print("[1/6] Verificando estrutura...")
-    
-    arquivos = ['app.py', 'processador_dados.py', 'calculadora_sla.py', 'sistema_incidentes_oop.py']
-    
-    for arquivo in arquivos:
-        if os.path.exists(arquivo):
-            print(f"  OK: {arquivo}")
-        else:
-            print(f"  ERRO: {arquivo} nao encontrado")
-            return False
-    
-    if not os.path.exists('abas'):
-        print("  ERRO: Pasta abas nao encontrada")
-        return False
-    
-    print("  OK: Estrutura verificada")
-    return True
-
 def main():
     print("=" * 60)
     print("  CRIADOR DE EXECUTAVEL - ANALISADOR AMS")
     print("=" * 60)
     print()
     
-    if not verificar_estrutura():
-        return False
+    print("[1/5] Verificando estrutura...")
+    arquivos = ['app.py', 'processador_dados.py', 'calculadora_sla.py', 'sistema_incidentes_oop.py']
+    for arquivo in arquivos:
+        if not os.path.exists(arquivo):
+            print(f"  ERRO: {arquivo} nao encontrado")
+            return False
+    print("  OK")
     
     print()
-    print("[2/6] Instalando PyInstaller...")
+    print("[2/5] Instalando PyInstaller...")
     subprocess.check_call([sys.executable, "-m", "pip", "install", "pyinstaller", "--quiet"])
     print("  OK")
     
     print()
-    print("[3/6] Limpando builds anteriores...")
-    for folder in ['build', 'dist', '__pycache__']:
+    print("[3/5] Limpando builds...")
+    for folder in ['build', 'dist']:
         if os.path.exists(folder):
             shutil.rmtree(folder)
     print("  OK")
     
     print()
-    print("[4/6] Criando executavel (3-5 minutos)...")
+    print("[4/5] Criando executavel COM CONSOLE (para debug)...")
     
     sep = ';' if sys.platform == 'win32' else ':'
     
@@ -58,7 +43,7 @@ def main():
         'pyinstaller',
         '--name=AnalisadorAMS',
         '--onefile',
-        '--noconsole',
+        # '--noconsole',  # COMENTADO para ver erros!
         f'--add-data=abas{sep}abas',
         f'--add-data=.streamlit{sep}.streamlit',
         '--hidden-import=processador_dados',
@@ -79,20 +64,21 @@ def main():
         '--hidden-import=google.generativeai',
         '--collect-all=streamlit',
         '--collect-all=plotly',
+        '--collect-all=altair',
         'app.py'
     ]
     
     result = subprocess.run(cmd, capture_output=True, text=True)
     
     if result.returncode != 0:
-        print("  ERRO ao criar executavel")
+        print("  ERRO")
         print(result.stderr[-500:])
         return False
     
     print("  OK")
     
     print()
-    print("[5/6] Verificando resultado...")
+    print("[5/5] Verificando...")
     
     exe_path = os.path.join('dist', 'AnalisadorAMS.exe')
     
@@ -103,30 +89,48 @@ def main():
         print("  ERRO: Executavel nao encontrado")
         return False
     
-    print()
-    print("[6/6] Criando documentacao...")
+    # Criar batch file para executar
+    with open('dist/EXECUTAR.bat', 'w') as f:
+        f.write('@echo off\n')
+        f.write('echo Iniciando Analisador AMS...\n')
+        f.write('echo.\n')
+        f.write('AnalisadorAMS.exe\n')
+        f.write('echo.\n')
+        f.write('echo Se houver erro acima, pressione qualquer tecla para fechar\n')
+        f.write('pause\n')
     
     with open('dist/LEIA-ME.txt', 'w', encoding='utf-8') as f:
         f.write("""
 ANALISADOR AMS - FORCEBEAT
 
+IMPORTANTE - VERSAO DEBUG:
+Esta versao abre uma janela de console para mostrar erros.
+
 COMO USAR:
-1. Duplo clique em AnalisadorAMS.exe
-2. Aguarde 10-20 segundos
-3. Navegador abre automaticamente
-4. Upload da planilha ServiceNow
+Opcao 1: Duplo clique em EXECUTAR.bat (recomendado)
+Opcao 2: Duplo clique em AnalisadorAMS.exe
 
-CHAT IA: API key ja incluida
-REQUISITOS: Windows 7/8/10/11 (64-bit)
+Se houver erro, a janela do console mostrara a mensagem.
 
-Versao: 1.0.0
+PROBLEMAS COMUNS:
+1. "ModuleNotFoundError" - Falta biblioteca
+2. "FileNotFoundError" - Falta arquivo
+3. Nada acontece - Aguarde 20 segundos
+
+Aguarde 10-20 segundos para o navegador abrir!
+
+Versao: 1.0.0 (DEBUG)
 """)
     
-    print("  OK")
     print()
     print("=" * 60)
-    print("  EXECUTAVEL CRIADO COM SUCESSO!")
+    print("  EXECUTAVEL CRIADO (COM CONSOLE PARA DEBUG)")
     print("=" * 60)
+    print()
+    print("IMPORTANTE:")
+    print("  Execute EXECUTAR.bat para ver erros")
+    print("  Console ficara aberto mostrando status")
+    print()
     
     return True
 
