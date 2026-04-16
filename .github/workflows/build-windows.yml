@@ -1,0 +1,51 @@
+name: Build Windows Executable
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  release:
+    types: [ created ]
+  workflow_dispatch:
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install pyinstaller
+        pip install -r requirements.txt
+    
+    - name: Create .streamlit directory
+      run: |
+        mkdir .streamlit
+    
+    - name: Create secrets.toml with API key
+      run: |
+        echo 'GEMINI_API_KEY = "${{ secrets.GEMINI_API_KEY }}"' > .streamlit/secrets.toml
+      shell: bash
+    
+    - name: Build Windows executable
+      run: |
+        python build_exe.py
+    
+    - name: Upload artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: AnalisadorAMS-Windows
+        path: |
+          dist/AnalisadorAMS.exe
+          dist/LEIA-ME.txt
+        retention-days: 90
