@@ -6,7 +6,7 @@ import abas.tma as tma
 import abas.categorias as categorias
 import abas.subcategorias as subcategorias
 import abas.macro_fechamento as macro_fechamento
-import abas.chat_ia as chat_ia
+##import abas.chat_ia as chat_ia
 
 # Configuração da Página
 st.set_page_config(
@@ -64,8 +64,8 @@ def main():
     with tabs[5]: 
         macro_fechamento.renderizar(df_resolvidos)
         
-    with tabs[6]: 
-        chat_ia.renderizar(df_resolvidos)
+    # with tabs[6]: 
+    #     chat_ia.renderizar(df_resolvidos)
         
     with tabs[7]: 
         st.subheader("📋 Base de Dados Completa (Tratada)")

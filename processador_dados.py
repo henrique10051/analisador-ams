@@ -41,9 +41,37 @@ def formatar_mes_pt(data):
 
 def processar_base(caminho):
     calc = CalculadoraSLA()
-    try: df = pd.read_excel(caminho)
-    except: df = pd.read_csv(caminho)
-    
+    import io
+
+    # Lê os bytes uma vez só
+    if hasattr(caminho, 'read'):
+        conteudo = caminho.read()
+    else:
+        with open(caminho, 'rb') as f:
+            conteudo = f.read()
+
+    df = None
+
+    # Tenta Excel primeiro
+    try:
+        df = pd.read_excel(io.BytesIO(conteudo))
+        print("✅ Lido como Excel, colunas:", list(df.columns[:5]))
+    except Exception as e:
+        print(f"❌ Excel falhou: {e}")
+
+    # Fallback CSV
+    if df is None:
+        for enc in ('latin-1', 'cp1252', 'utf-8-sig', 'utf-8'):
+            try:
+                df = pd.read_csv(io.BytesIO(conteudo), encoding=enc)
+                print(f"✅ Lido como CSV ({enc}), colunas:", list(df.columns[:5]))
+                break
+            except Exception as e:
+                print(f"❌ CSV {enc} falhou: {e}")
+
+    if df is None:
+        raise ValueError("Não foi possível ler o arquivo. Verifique se é um Excel ou CSV válido.")
+
     df['Opened'] = pd.to_datetime(df['Opened'], errors='coerce')
     df['Resolved'] = pd.to_datetime(df['Resolved'], errors='coerce')
     df['Empresa'] = df['Service'].apply(identificar_empresa)
