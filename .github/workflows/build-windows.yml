@@ -30,6 +30,7 @@ jobs:
     
     - name: Create secrets.toml with API keys
       run: |
+        mkdir -p .streamlit
         echo 'GEMINI_API_KEY = "${{ secrets.GEMINI_API_KEY }}"' > .streamlit/secrets.toml
         echo 'SUPABASE_URL = "${{ secrets.SUPABASE_URL }}"' >> .streamlit/secrets.toml
         echo 'SUPABASE_ANON_KEY = "${{ secrets.SUPABASE_ANON_KEY }}"' >> .streamlit/secrets.toml
