@@ -2,6 +2,8 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 
+from abas.ui_helpers import tabela_editavel
+
 def renderizar(df_resolvidos):
     st.subheader("Configuração da Aba de Subcategorias")
     
@@ -60,9 +62,7 @@ def renderizar(df_resolvidos):
         sub_sel = st.selectbox("Selecione a Subcategoria para ver os detalhes:", ordem_sub, key="select_sub_final")
         
         df_det = df_f[df_f['SubCategoria'] == sub_sel].sort_values('Opened', ascending=False)
-        st.dataframe(
-            df_det[['Number', 'Empresa', 'Categoria', 'Descricao_Tratada', 'Opened', 'TMA - Dias corridos', 'SLA - Dias (8 h)', 'Assigned to']], 
-            use_container_width=True, hide_index=True
-        )
+        df_tab = df_det[['Number', 'Empresa', 'Macro', 'Categoria', 'SubCategoria', 'Descricao_Tratada', 'Opened', 'TMA - Dias corridos', 'SLA - Dias (8 h)', 'Assigned to']]
+        tabela_editavel(df_tab, df_tab.columns.tolist(), key='editor_subcategorias')
     else:
         st.warning("Nenhum dado encontrado para os filtros selecionados.")

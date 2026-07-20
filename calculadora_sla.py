@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 
 class CalculadoraSLA:
-    def __init__(self):
+    def __init__(self, dias_nao_uteis_extra=None):
         self.hora_inicio = 9
         self.hora_fim = 18
         feriados_strings = [
@@ -19,7 +19,11 @@ class CalculadoraSLA:
             '2026-05-01', '2026-06-04', '2026-09-07', '2026-10-12', '2026-11-02',
             '2026-11-15', '2026-11-20', '2026-12-25'
         ]
-        self.feriados = [np.datetime64(f) for f in feriados_strings]
+        feriados = [np.datetime64(f) for f in feriados_strings]
+        if dias_nao_uteis_extra:
+            feriados += [np.datetime64(d) for d in dias_nao_uteis_extra]
+        # remove duplicados mantendo o tipo np.datetime64
+        self.feriados = list({str(f): f for f in feriados}.values())
     
     def _calcular_horas_abertura(self, hora_dt):
         if pd.isna(hora_dt) or not hasattr(hora_dt, 'hour'): return 0

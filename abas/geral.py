@@ -3,6 +3,8 @@ import plotly.express as px
 import plotly.graph_objects as go
 import pandas as pd
 
+from abas.ui_helpers import tabela_editavel
+
 def renderizar(df_completo):
     st.markdown("### 📊 Volumetria de Incidentes (Geral)")
     
@@ -39,24 +41,24 @@ def renderizar(df_completo):
     if not df_vol_filt.empty:
         df_total = df_vol_filt.groupby(['Mes_Opened_Sort', 'Mes_Opened_Display']).size().reset_index(name='Total')
         df_total = df_total.sort_values('Mes_Opened_Sort').tail(12)
-        
-        col_g1, col_g2 = st.columns(2)
-        with col_g1:
-            fig = go.Figure()
-            fig.add_trace(go.Scatter(x=df_total['Mes_Opened_Display'], y=df_total['Total'], mode='lines+markers+text', 
-                                     text=df_total['Total'], textposition='top center', line=dict(color='#2563eb', width=3)))
-            fig.update_layout(title="Quantidade Total de Incidentes", height=400)
-            st.plotly_chart(fig, use_container_width=True)
 
-        with col_g2:
-            df_dx = df_vol_filt[df_vol_filt['Mes_Opened_Sort'].isin(df_total['Mes_Opened_Sort'])]
-            df_dx_grp = df_dx.groupby(['Mes_Opened_Display', 'Empresa']).size().reset_index(name='Qtd')
-            fig_dx = px.bar(df_dx_grp, x='Mes_Opened_Display', y='Qtd', color='Empresa', barmode='group',
-                            title="Incidentes por DX", color_discrete_map={'CE': '#3b82f6', 'RJ': '#10b981', 'SP': '#f59e0b'}, text_auto=True)
-            st.plotly_chart(fig_dx, use_container_width=True)
+        fig = go.Figure()
+        fig.add_trace(go.Scatter(x=df_total['Mes_Opened_Display'], y=df_total['Total'], mode='lines+markers+text',
+                                 text=df_total['Total'], textposition='top center', line=dict(color='#2563eb', width=3)))
+        fig.update_layout(title="Quantidade Total de Incidentes", height=400)
+        st.plotly_chart(fig, use_container_width=True)
+
+        df_dx = df_vol_filt[df_vol_filt['Mes_Opened_Sort'].isin(df_total['Mes_Opened_Sort'])]
+        df_dx_grp = df_dx.groupby(['Mes_Opened_Display', 'Empresa']).size().reset_index(name='Qtd')
+        fig_dx = px.bar(df_dx_grp, x='Mes_Opened_Display', y='Qtd', color='Empresa', barmode='group',
+                        title="Incidentes por DX", color_discrete_map={'CE': '#3b82f6', 'RJ': '#10b981', 'SP': '#f59e0b'}, text_auto=True)
+        fig_dx.update_layout(height=400)
+        st.plotly_chart(fig_dx, use_container_width=True)
 
         st.divider()
         st.markdown("### 📋 Detalhamento Analítico")
-        df_tab = df_vol_filt[['Number', 'Empresa', 'Macro', 'Categoria', 'SubCategoria', 'Descricao_Tratada', 'Opened', 'State']].copy()
-        df_tab.columns = ['Chamado', 'DX', 'Macro', 'Categoria', 'Subcategoria', 'Descrição', 'Abertura', 'Status']
-        st.dataframe(df_tab.sort_values('Abertura', ascending=False), use_container_width=True, hide_index=True)
+        st.caption("Edite Macro, Categoria, Subcategoria ou Descrição diretamente na tabela e clique em salvar.")
+
+        df_tab = df_vol_filt[['Number', 'Empresa', 'Macro', 'Categoria', 'SubCategoria', 'Descricao_Tratada', 'Opened', 'State']]
+        df_tab = df_tab.sort_values('Opened', ascending=False)
+        tabela_editavel(df_tab, df_tab.columns.tolist(), key='editor_geral')

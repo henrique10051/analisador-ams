@@ -28,9 +28,11 @@ jobs:
         pip install pyinstaller
         pip install -r requirements.txt
     
-    - name: Create secrets.toml with API key
+    - name: Create secrets.toml with API keys
       run: |
         echo 'GEMINI_API_KEY = "${{ secrets.GEMINI_API_KEY }}"' > .streamlit/secrets.toml
+        echo 'SUPABASE_URL = "${{ secrets.SUPABASE_URL }}"' >> .streamlit/secrets.toml
+        echo 'SUPABASE_ANON_KEY = "${{ secrets.SUPABASE_ANON_KEY }}"' >> .streamlit/secrets.toml
       shell: bash
     
     - name: Build Windows executable

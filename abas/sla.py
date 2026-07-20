@@ -2,6 +2,8 @@ import streamlit as st
 import plotly.express as px
 import plotly.graph_objects as go
 
+from abas.ui_helpers import tabela_editavel
+
 def renderizar(df_resolvidos):
     st.subheader("Configuração da Aba de SLA")
     
@@ -35,19 +37,21 @@ def renderizar(df_resolvidos):
             Média=('SLA - Dias (8 h)', 'mean'), Máximo=('SLA - Dias (8 h)', 'max'), Mínimo=('SLA - Dias (8 h)', 'min')
         ).reset_index()
 
-        g1, g2 = st.columns(2)
-        with g1:
-            st.plotly_chart(px.bar(df_m, x='Mes_Display', y='Média', text_auto='.2f', title="Média de SLA (Dias Úteis)"), use_container_width=True)
-        with g2:
-            fig = go.Figure()
-            fig.add_trace(go.Scatter(x=df_m['Mes_Display'], y=df_m['Máximo'], mode='lines+markers+text', name='Max', text=[f"{v:.1f}" for v in df_m['Máximo']], textposition='top center', line=dict(color='#f97316', width=3)))
-            fig.add_trace(go.Scatter(x=df_m['Mes_Display'], y=df_m['Mínimo'], mode='lines+markers+text', name='Min', text=[f"{v:.1f}" for v in df_m['Mínimo']], textposition='bottom center', line=dict(color='#10b981', width=3)))
-            fig.update_layout(title="Extremos de SLA", legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1))
-            st.plotly_chart(fig, use_container_width=True)
+        fig_media = px.bar(df_m, x='Mes_Display', y='Média', text_auto='.2f', title="Média de SLA (Dias Úteis)")
+        fig_media.update_layout(height=400)
+        st.plotly_chart(fig_media, use_container_width=True)
+
+        fig = go.Figure()
+        fig.add_trace(go.Scatter(x=df_m['Mes_Display'], y=df_m['Máximo'], mode='lines+markers+text', name='Max', text=[f"{v:.1f}" for v in df_m['Máximo']], textposition='top center', line=dict(color='#f97316', width=3)))
+        fig.add_trace(go.Scatter(x=df_m['Mes_Display'], y=df_m['Mínimo'], mode='lines+markers+text', name='Min', text=[f"{v:.1f}" for v in df_m['Mínimo']], textposition='bottom center', line=dict(color='#10b981', width=3)))
+        fig.update_layout(title="Extremos de SLA", height=400, legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1))
+        st.plotly_chart(fig, use_container_width=True)
 
         st.divider()
         st.markdown("### 🔍 Detalhes do Mês (Top Infratores SLA)")
         mes_sel = st.selectbox("Analise os tickets de um mês específico:", reversed(df_m['Mes_Display'].tolist()))
-        st.dataframe(df_sla[df_sla['Mes_Display'] == mes_sel].sort_values('SLA - Dias (8 h)', ascending=False)[['Number', 'Empresa', 'Macro', 'SLA - Dias (8 h)', 'Short description', 'Assigned to']], use_container_width=True, hide_index=True)
+        df_tab = df_sla[df_sla['Mes_Display'] == mes_sel].sort_values('SLA - Dias (8 h)', ascending=False)
+        df_tab = df_tab[['Number', 'Empresa', 'Macro', 'Categoria', 'SubCategoria', 'Descricao_Tratada', 'SLA - Dias (8 h)', 'Short description', 'Assigned to']]
+        tabela_editavel(df_tab, df_tab.columns.tolist(), key='editor_sla')
     else:
         st.warning("Selecione filtros válidos para visualizar o SLA.")

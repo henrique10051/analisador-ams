@@ -2,6 +2,8 @@ import streamlit as st
 import plotly.express as px
 import plotly.graph_objects as go
 
+from abas.ui_helpers import tabela_editavel
+
 def renderizar(df_resolvidos):
     st.subheader("Configuração da Aba de TMA")
     
@@ -35,23 +37,22 @@ def renderizar(df_resolvidos):
             Média=('TMA - Dias corridos', 'mean'), Máximo=('TMA - Dias corridos', 'max'), Mínimo=('TMA - Dias corridos', 'min')
         ).reset_index()
 
-        g1, g2 = st.columns(2)
-        with g1:
-            fig_tma_media = px.bar(df_tma_mes, x='Mes_Display', y='Média', text_auto='.2f', title="Média de TMA (Dias Corridos)", color_discrete_sequence=['#8b5cf6'])
-            fig_tma_media.update_traces(textposition='outside')
-            st.plotly_chart(fig_tma_media, use_container_width=True)
-            
-        with g2:
-            fig_tma_maxmin = go.Figure()
-            fig_tma_maxmin.add_trace(go.Scatter(x=df_tma_mes['Mes_Display'], y=df_tma_mes['Máximo'], mode='lines+markers+text', name='Max', line=dict(color='#f97316', width=3), text=[f"{v:.1f}" for v in df_tma_mes['Máximo']], textposition='top center'))
-            fig_tma_maxmin.add_trace(go.Scatter(x=df_tma_mes['Mes_Display'], y=df_tma_mes['Mínimo'], mode='lines+markers+text', name='Min', line=dict(color='#10b981', width=3), text=[f"{v:.1f}" for v in df_tma_mes['Mínimo']], textposition='bottom center'))
-            fig_tma_maxmin.update_layout(title="Extremos de TMA", legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1))
-            st.plotly_chart(fig_tma_maxmin, use_container_width=True)
+        fig_tma_media = px.bar(df_tma_mes, x='Mes_Display', y='Média', text_auto='.2f', title="Média de TMA (Dias Corridos)", color_discrete_sequence=['#8b5cf6'])
+        fig_tma_media.update_traces(textposition='outside')
+        fig_tma_media.update_layout(height=400)
+        st.plotly_chart(fig_tma_media, use_container_width=True)
+
+        fig_tma_maxmin = go.Figure()
+        fig_tma_maxmin.add_trace(go.Scatter(x=df_tma_mes['Mes_Display'], y=df_tma_mes['Máximo'], mode='lines+markers+text', name='Max', line=dict(color='#f97316', width=3), text=[f"{v:.1f}" for v in df_tma_mes['Máximo']], textposition='top center'))
+        fig_tma_maxmin.add_trace(go.Scatter(x=df_tma_mes['Mes_Display'], y=df_tma_mes['Mínimo'], mode='lines+markers+text', name='Min', line=dict(color='#10b981', width=3), text=[f"{v:.1f}" for v in df_tma_mes['Mínimo']], textposition='bottom center'))
+        fig_tma_maxmin.update_layout(title="Extremos de TMA", height=400, legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1))
+        st.plotly_chart(fig_tma_maxmin, use_container_width=True)
 
         st.divider()
         st.markdown("### 🔍 Detalhes do Mês (Top Infratores TMA)")
         mes_sel_tma = st.selectbox("Selecione um mês para ver os tickets que mais demoraram:", reversed(df_tma_mes['Mes_Display'].tolist()), key="select_mes_tma")
         df_tma_detalhe = df_tma[df_tma['Mes_Display'] == mes_sel_tma].sort_values('TMA - Dias corridos', ascending=False)
-        st.dataframe(df_tma_detalhe[['Number', 'Empresa', 'Macro', 'TMA - Dias corridos', 'SLA - Dias (8 h)', 'Short description', 'Assigned to']], use_container_width=True, hide_index=True)
+        df_tab = df_tma_detalhe[['Number', 'Empresa', 'Macro', 'Categoria', 'SubCategoria', 'Descricao_Tratada', 'TMA - Dias corridos', 'SLA - Dias (8 h)', 'Short description', 'Assigned to']]
+        tabela_editavel(df_tab, df_tab.columns.tolist(), key='editor_tma')
     else:
         st.warning("Selecione filtros válidos para visualizar o TMA.")

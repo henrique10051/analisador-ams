@@ -15,7 +15,10 @@ def main():
     print()
     
     print("[1/5] Verificando estrutura...")
-    arquivos = ['app.py', 'processador_dados.py', 'calculadora_sla.py', 'sistema_incidentes_oop.py']
+    arquivos = [
+        'app.py', 'processador_dados.py', 'calculadora_sla.py', 'sistema_incidentes_oop.py',
+        'supabase_client.py', 'repositorio_incidentes.py',
+    ]
     for arquivo in arquivos:
         if not os.path.exists(arquivo):
             print(f"  ERRO: {arquivo} nao encontrado")
@@ -49,6 +52,8 @@ def main():
         '--hidden-import=processador_dados',
         '--hidden-import=calculadora_sla',
         '--hidden-import=sistema_incidentes_oop',
+        '--hidden-import=supabase_client',
+        '--hidden-import=repositorio_incidentes',
         '--hidden-import=abas.geral',
         '--hidden-import=abas.sla',
         '--hidden-import=abas.tma',
@@ -56,15 +61,20 @@ def main():
         '--hidden-import=abas.subcategorias',
         '--hidden-import=abas.macro_fechamento',
         '--hidden-import=abas.chat_ia',
+        '--hidden-import=abas.dias_nao_uteis',
+        '--hidden-import=abas.ui_helpers',
         '--hidden-import=streamlit',
         '--hidden-import=plotly',
         '--hidden-import=pandas',
         '--hidden-import=openpyxl',
         '--hidden-import=numpy',
         '--hidden-import=google.generativeai',
+        '--hidden-import=supabase',
+        '--hidden-import=dotenv',
         '--collect-all=streamlit',
         '--collect-all=plotly',
         '--collect-all=altair',
+        '--collect-all=supabase',
         'app.py'
     ]
     

@@ -1,6 +1,8 @@
 import streamlit as st
 import pandas as pd
 
+from abas.ui_helpers import tabela_editavel
+
 def renderizar(df_resolvidos):
     st.subheader("🎯 Matriz de Macro Fechamento")
     
@@ -64,11 +66,8 @@ def renderizar(df_resolvidos):
             st.success(f"Exibindo **{len(df_detalhe)}** incidentes para **{sel_macro}** / **{sel_code}**")
             
             # Tabela de Detalhes com as colunas analíticas
-            st.dataframe(
-                df_detalhe[['Number', 'Empresa', 'Categoria', 'SubCategoria', 'Descricao_Tratada', 'Resolved', 'Assigned to', 'Close notes']], 
-                use_container_width=True, 
-                hide_index=True
-            )
+            df_tab = df_detalhe[['Number', 'Empresa', 'Macro', 'Categoria', 'SubCategoria', 'Descricao_Tratada', 'Resolved', 'Assigned to', 'Close notes']]
+            tabela_editavel(df_tab, df_tab.columns.tolist(), key='editor_macro_fechamento')
         else:
             st.info("Nenhum incidente para esta combinação no período.")
             
