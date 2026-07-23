@@ -11,6 +11,25 @@ interface Props {
 
 type Status = "idle" | "copiando" | "copiado" | "baixando" | "erro";
 
+// Export always renders on a forced white background (see backgroundColor
+// below), regardless of the app's active theme. html-to-image bakes each
+// element's resolved (getComputedStyle) color into the clone at capture
+// time — in dark mode that resolves --color-graphite etc. to their
+// near-white, dark-canvas values, which vanish on the white export. So we
+// flip the document to the light theme for the duration of the capture,
+// which makes every var() resolve to light-theme colors before cloning.
+async function comTemaClaro<T>(fn: () => Promise<T>): Promise<T> {
+  const root = document.documentElement;
+  const temaOriginal = root.getAttribute("data-theme");
+  root.setAttribute("data-theme", "light");
+  try {
+    return await fn();
+  } finally {
+    if (temaOriginal === null) root.removeAttribute("data-theme");
+    else root.setAttribute("data-theme", temaOriginal);
+  }
+}
+
 export default function ChartToolbar({ targetRef, filename }: Props) {
   const [status, setStatus] = useState<Status>("idle");
 
@@ -22,7 +41,9 @@ export default function ChartToolbar({ targetRef, filename }: Props) {
     if (!targetRef.current) return;
     setStatus("copiando");
     try {
-      const blob = await toBlob(targetRef.current, { backgroundColor: "#ffffff", pixelRatio: 2 });
+      const blob = await comTemaClaro(() =>
+        toBlob(targetRef.current!, { backgroundColor: "#ffffff", pixelRatio: 2 })
+      );
       if (!blob) throw new Error("Falha ao gerar imagem.");
       await navigator.clipboard.write([new ClipboardItem({ "image/png": blob })]);
       setStatus("copiado");
@@ -37,11 +58,9 @@ export default function ChartToolbar({ targetRef, filename }: Props) {
     if (!targetRef.current) return;
     setStatus("baixando");
     try {
-      const dataUrl = await toJpeg(targetRef.current, {
-        backgroundColor: "#ffffff",
-        pixelRatio: 2,
-        quality: 0.95,
-      });
+      const dataUrl = await comTemaClaro(() =>
+        toJpeg(targetRef.current!, { backgroundColor: "#ffffff", pixelRatio: 2, quality: 0.95 })
+      );
       const link = document.createElement("a");
       link.download = `${filename}.jpg`;
       link.href = dataUrl;
