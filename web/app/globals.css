@@ -1,0 +1,237 @@
+/*
+  DIRECTION CONTRACT — Analisador AMS
+  THESIS: ops tools default to generic SaaS dashboard chrome; this one refuses
+  that by becoming the literal electrical distribution panel (quadro de
+  distribuição) its own analysts stand in front of every day.
+  OWN-WORLD: dark brushed-metal panel ground, brass engraved plates, red/black
+  breaker toggles as navigation, analog gauge KPIs, green/amber/red pilot
+  lamps as the SLA status language, slotted-screw corners on every mounted
+  plate.
+  STORY: an analyst opens the panel, throws the breaker for the tab they
+  need, watches gauges settle on the month's numbers, reads lamp color
+  before reading any digit.
+  FIRST VIEWPORT: dark fascia header with brass wordmark plate, a row of
+  numbered breaker-switch tabs, lit gauge KPIs below, tables as bolted plates.
+  FORM: circuit-breaker distribution panel — assigned direction #3 of the
+  ranked list, fused with an aviation instrument six-pack for the gauge
+  language. Seed key 7fed89ec (mode: operate).
+*/
+
+@import "tailwindcss";
+
+:root {
+  color-scheme: dark;
+
+  /* Painel fechado (default): metal escovado escuro, lâmpadas acesas */
+  --color-ink: #0e0f10;
+  --color-ink-raised: #17181a;
+  --color-paper: #1b1c1e;
+  --color-paper-raised: #232427;
+  --color-graphite: #e9e6dd;
+  --color-fog: #9a9d9f;
+  --color-line: #38393c;
+
+  --color-copper: #c8963f;
+  --color-copper-soft: #3a301c;
+  --color-circuit: #4fb8c4;
+  --color-circuit-soft: #163338;
+  --color-amber: #e0a83f;
+  --color-amber-soft: #3a2c14;
+  --color-signal: #dd5340;
+  --color-signal-soft: #3a1a15;
+  --color-lamp-green: #52b565;
+  --color-lamp-green-soft: #16301c;
+  --color-violet: #9884d6;
+  --color-violet-soft: #241f38;
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
+
+  /* Painel aberto: gabinete esmaltado, luz de dia */
+  --color-ink: #26241f;
+  --color-ink-raised: #322f28;
+  --color-paper: #ece8dd;
+  --color-paper-raised: #f8f6f0;
+  --color-graphite: #211f1a;
+  --color-fog: #6f6a5f;
+  --color-line: #d8d2c0;
+
+  --color-copper: #a3701f;
+  --color-copper-soft: #e9d6ad;
+  --color-circuit: #0f7c88;
+  --color-circuit-soft: #cfe9ea;
+  --color-amber: #a8730f;
+  --color-amber-soft: #f0dfb8;
+  --color-signal: #b23a26;
+  --color-signal-soft: #f3d9d1;
+  --color-lamp-green: #2f7d42;
+  --color-lamp-green-soft: #d3ecd8;
+  --color-violet: #6a55ad;
+  --color-violet-soft: #e2dcf3;
+}
+
+@theme inline {
+  --color-ink: var(--color-ink);
+  --color-ink-raised: var(--color-ink-raised);
+  --color-paper: var(--color-paper);
+  --color-paper-raised: var(--color-paper-raised);
+  --color-graphite: var(--color-graphite);
+  --color-fog: var(--color-fog);
+  --color-line: var(--color-line);
+  --color-copper: var(--color-copper);
+  --color-copper-soft: var(--color-copper-soft);
+  --color-circuit: var(--color-circuit);
+  --color-circuit-soft: var(--color-circuit-soft);
+  --color-amber: var(--color-amber);
+  --color-amber-soft: var(--color-amber-soft);
+  --color-signal: var(--color-signal);
+  --color-signal-soft: var(--color-signal-soft);
+  --color-lamp-green: var(--color-lamp-green);
+  --color-lamp-green-soft: var(--color-lamp-green-soft);
+  --color-violet: var(--color-violet);
+  --color-violet-soft: var(--color-violet-soft);
+  --font-display: var(--font-display);
+  --font-body: var(--font-body);
+  --font-mono: var(--font-mono);
+}
+
+body {
+  font-family: var(--font-body), sans-serif;
+  transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+::selection {
+  background: var(--color-copper-soft);
+  color: var(--color-graphite);
+}
+
+/* Cabeça de parafuso fenda, ancorada nos 4 cantos de toda placa montada */
+.screwed {
+  position: relative;
+}
+.screwed::before,
+.screwed::after,
+.screwed .screw-br,
+.screwed .screw-bl {
+  content: "";
+  position: absolute;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background:
+    linear-gradient(35deg, transparent 46%, rgba(0, 0, 0, 0.55) 46%, rgba(0, 0, 0, 0.55) 54%, transparent 54%),
+    radial-gradient(circle at 35% 30%, #9a8f78 0%, #6b6355 55%, #3c3830 100%);
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.5);
+}
+.screwed::before {
+  top: 7px;
+  left: 7px;
+}
+.screwed::after {
+  top: 7px;
+  right: 7px;
+}
+.screwed .screw-bl {
+  bottom: 7px;
+  left: 7px;
+}
+.screwed .screw-br {
+  bottom: 7px;
+  right: 7px;
+}
+
+/* Lâmpada piloto: brilho contido, nunca decorativo além do estado que representa */
+.pilot-lamp {
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.4) inset, 0 0 6px 1px currentColor;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes gauge-settle {
+    0% {
+      opacity: 0;
+      transform: translateY(5px) rotate(-2.5deg);
+    }
+    60% {
+      opacity: 1;
+      transform: translateY(-1px) rotate(0.5deg);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0) rotate(0deg);
+    }
+  }
+  .gauge-mount {
+    animation: gauge-settle 0.5s cubic-bezier(0.2, 0.8, 0.3, 1.1) backwards;
+  }
+
+  @keyframes lamp-flicker {
+    0%,
+    100% {
+      opacity: 1;
+    }
+    92% {
+      opacity: 1;
+    }
+    94% {
+      opacity: 0.55;
+    }
+    96% {
+      opacity: 1;
+    }
+  }
+  .lamp-flicker {
+    animation: lamp-flicker 4.5s ease-in-out infinite;
+  }
+
+  @keyframes toggle-throw {
+    0% {
+      transform: scale(1);
+    }
+    40% {
+      transform: scale(0.94) translateY(1px);
+    }
+    100% {
+      transform: scale(1);
+    }
+  }
+  .toggle-throw:active {
+    animation: toggle-throw 0.18s ease-out;
+  }
+
+  @keyframes panel-in {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  .panel-in {
+    animation: panel-in 0.35s ease-out backwards;
+  }
+
+  @keyframes trip-shake {
+    0%,
+    100% {
+      transform: translateX(0);
+    }
+    20% {
+      transform: translateX(-3px);
+    }
+    40% {
+      transform: translateX(3px);
+    }
+    60% {
+      transform: translateX(-2px);
+    }
+    80% {
+      transform: translateX(2px);
+    }
+  }
+  .trip-shake {
+    animation: trip-shake 0.4s ease-in-out;
+  }
+}
